@@ -10,12 +10,13 @@ import "os"
 import "path/filepath"
 
 const (
-	FSN_CREATE = 1
-	FSN_MODIFY = 2
-	FSN_DELETE = 4
-	FSN_RENAME = 8
+	CREATE = 1 << iota
+	MODIFY
+	DELETE
+	RENAME
+	FILE_WRITE
 
-	FSN_ALL = FSN_MODIFY | FSN_DELETE | FSN_RENAME | FSN_CREATE
+	ALL_FLAGS = MODIFY | DELETE | RENAME | CREATE | FILE_WRITE
 )
 
 // Purge events from interal chan to external chan if passes filter
@@ -26,19 +27,23 @@ func (w *Watcher) purgeEvents() {
 		fsnFlags := w.fsnFlags[ev.Name]
 		w.fsnmut.Unlock()
 
-		if (fsnFlags&FSN_CREATE == FSN_CREATE) && ev.IsCreate() {
+		if (fsnFlags&CREATE == CREATE) && ev.IsCreate() {
 			sendEvent = true
 		}
 
-		if (fsnFlags&FSN_MODIFY == FSN_MODIFY) && ev.IsModify() {
+		if (fsnFlags&MODIFY == MODIFY) && ev.IsModify() {
 			sendEvent = true
 		}
 
-		if (fsnFlags&FSN_DELETE == FSN_DELETE) && ev.IsDelete() {
+		if (fsnFlags&DELETE == DELETE) && ev.IsDelete() {
 			sendEvent = true
 		}
 
-		if (fsnFlags&FSN_RENAME == FSN_RENAME) && ev.IsRename() {
+		if (fsnFlags&RENAME == RENAME) && ev.IsRename() {
+			sendEvent = true
+		}
+
+		if (fsnFlags&FILE_WRITE == FILE_WRITE) && ev.IsFileWrite() {
 			sendEvent = true
 		}
 
@@ -62,9 +67,9 @@ func (w *Watcher) purgeEvents() {
 // Watch a given file path
 func (w *Watcher) Watch(path string) error {
 	w.fsnmut.Lock()
-	w.fsnFlags[path] = FSN_ALL
+	w.fsnFlags[path] = ALL_FLAGS
 	w.fsnmut.Unlock()
-	return w.watch(path)
+	return w.watchAllEvents(path)
 }
 
 // Watch all files in a given directory
@@ -76,12 +81,26 @@ func (w *Watcher) WatchAll(path string) error {
 	return filepath.Walk(path, watchFunc)
 }
 
-// Watch a given file path for a particular set of notifications (FSN_MODIFY etc.)
+// Watch all files in a given directory for a set of notifications
+func (w *Watcher) WatchAllFlags(path string, flags uint32) error {
+	w.fsnmut.Lock()
+	w.fsnFlags[path] = flags
+	w.fsnmut.Unlock()
+
+	watchFunc := func(path string, fi os.FileInfo, err error) error {
+		return w.Watch(path)
+	}
+
+	return filepath.Walk(path, watchFunc)
+}
+
+// Watch a given file path for a particular set of notifications (MODIFY etc.)
 func (w *Watcher) WatchFlags(path string, flags uint32) error {
 	w.fsnmut.Lock()
 	w.fsnFlags[path] = flags
 	w.fsnmut.Unlock()
-	return w.watch(path)
+
+	return w.watchAllEvents(path)
 }
 
 // Remove a watch on a file
@@ -89,6 +108,7 @@ func (w *Watcher) RemoveWatch(path string) error {
 	w.fsnmut.Lock()
 	delete(w.fsnFlags, path)
 	w.fsnmut.Unlock()
+
 	return w.removeWatch(path)
 }
 

@@ -179,7 +179,7 @@ func (w *Watcher) addWatch(path string, flags uint32) error {
 }
 
 // Watch adds path to the watched file set, watching all events.
-func (w *Watcher) watch(path string) error {
+func (w *Watcher) watchAllEvents(path string) error {
 	return w.addWatch(path, sys_AGNOSTIC_EVENTS)
 }
 
@@ -271,7 +271,7 @@ func (w *Watcher) readEvents() {
 					if fsnFlags, watchFound := w.fsnFlags[watchedName]; watchFound {
 						w.fsnFlags[event.Name] = fsnFlags
 					} else {
-						w.fsnFlags[event.Name] = FSN_ALL
+						w.fsnFlags[event.Name] = ALL_FLAGS
 					}
 				}
 				w.fsnmut.Unlock()

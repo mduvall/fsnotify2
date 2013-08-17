@@ -181,7 +181,7 @@ func (w *Watcher) AddWatch(path string, flags uint32) error {
 }
 
 // Watch adds path to the watched file set, watching all events.
-func (w *Watcher) watch(path string) error {
+func (w *Watcher) watchAllEvents(path string) error {
 	return w.AddWatch(path, sys_FS_ALL_EVENTS)
 }
 

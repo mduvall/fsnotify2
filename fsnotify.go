@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package fsnotify implements filesystem notification.
-package fsnotify
+package fsnotify2
 
 import "fmt"
 

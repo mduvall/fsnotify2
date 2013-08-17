@@ -4,7 +4,7 @@
 
 // +build darwin
 
-package fsnotify
+package fsnotify2
 
 import "syscall"
 

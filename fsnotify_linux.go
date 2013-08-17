@@ -4,7 +4,7 @@
 
 // +build linux
 
-package fsnotify
+package fsnotify2
 
 import (
 	"errors"
@@ -214,7 +214,7 @@ func (w *Watcher) readEvents() {
 		default:
 		}
 
-			n, errno = syscall.Read(w.fd, buf[0:])
+		n, errno = syscall.Read(w.fd, buf[0:])
 
 		// If EOF is received
 		if n == 0 {

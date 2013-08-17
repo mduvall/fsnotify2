@@ -4,7 +4,7 @@
 
 // +build freebsd openbsd netbsd
 
-package fsnotify
+package fsnotify2
 
 import "syscall"
 

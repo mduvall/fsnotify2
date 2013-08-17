@@ -4,7 +4,7 @@
 
 // +build freebsd openbsd netbsd darwin
 
-package fsnotify
+package fsnotify2
 
 import (
 	"errors"

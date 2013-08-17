@@ -109,6 +109,10 @@ func (e *FileEvent) String() string {
 		events += "|" + "MODIFY"
 	}
 
+	if e.IsFileWrite() {
+		events += "|" + "FILE_WRITE"
+	}
+
 	if e.IsRename() {
 		events += "|" + "RENAME"
 	}

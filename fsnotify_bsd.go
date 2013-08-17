@@ -45,9 +45,14 @@ func (e *FileEvent) IsCreate() bool { return e.create }
 // IsDelete reports whether the FileEvent was triggerd by a delete
 func (e *FileEvent) IsDelete() bool { return (e.mask & sys_NOTE_DELETE) == sys_NOTE_DELETE }
 
-// IsModify reports whether the FileEvent was triggerd by a file modification
+// IsModify reports whether the FileEvent was triggerd by a file modification or attribute change
 func (e *FileEvent) IsModify() bool {
-	return ((e.mask&sys_NOTE_WRITE) == sys_NOTE_WRITE || (e.mask&sys_NOTE_ATTRIB) == sys_NOTE_ATTRIB)
+	return (e.IsFileWrite() || (e.mask&sys_NOTE_ATTRIB) == sys_NOTE_ATTRIB)
+}
+
+// IsFileWrite reports whether the FileEvent was triggerd by a file modification
+func (e *FileEvent) IsFileWrite() bool {
+	return ((e.mask & sys_NOTE_WRITE) == sys_NOTE_WRITE)
 }
 
 // IsRename reports whether the FileEvent was triggerd by a change name

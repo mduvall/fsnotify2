@@ -6,6 +6,8 @@
 package fsnotify2
 
 import "fmt"
+import "os"
+import "path/filepath"
 
 const (
 	FSN_CREATE = 1
@@ -63,6 +65,15 @@ func (w *Watcher) Watch(path string) error {
 	w.fsnFlags[path] = FSN_ALL
 	w.fsnmut.Unlock()
 	return w.watch(path)
+}
+
+// Watch all files in a given directory
+func (w *Watcher) WatchAll(path string) error {
+	watchFunc := func(path string, fi os.FileInfo, err error) error {
+		return w.Watch(path)
+	}
+
+	return filepath.Walk(path, watchFunc)
 }
 
 // Watch a given file path for a particular set of notifications (FSN_MODIFY etc.)
